@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <canvas id="canvas" width="600" height="600" style="border: 1px solid black"></canvas>
+  <div class="updates"></div>
+  <script>
+    var updates = document.querySelector('.updates');
+    var canvas = document.getElementById('canvas');
+    var ctx = canvas.getContext('2d');
+    let x,y,snake,dx,dy, mx, my,
+      snakeColor,foodColor,snakeSize,foodX,
+      foodY, growthPerFood, snakeSpeed, squareSize, 
+      keys=[], drawing, score, highScore, playing, controlWithMouse, mouseMoved;
+    
+    // add keylistener to keep track of latest key pressed
+    document.addEventListener('keydown', function(event) {
+      keys[event.keyCode] = true;
+      if(playing!==true){
+        setup();
+      }
+    });
+    
+    document.addEventListener('keyup', function(event) {
+      keys[event.keyCode] = false;
+    });
+
+    // add a mouseMove listener to keep track of mouse position
+    canvas.addEventListener('mousemove', function(event) {
+      mx = event.offsetX;
+      my = event.offsetY;
+      mouseMoved = true;
+    } );
+
+    // add a mouseDown listener to start the game
+    canvas.addEventListener('mousedown', function(event) {
+      if(playing!==true){
+        setup(true);
+      }
+    } );
+    
+    function setup(Mouse =false) {
+      controlWithMouse = Mouse;
+      squareSize = 20;
+      // create random start position for the snake
+      [x, y] = randomPosition();
+      // start on left half of the screen
+      x/=2;
+      snake = [{x: x, y: y}];
+      keys=[];
+      dx = 1;
+      dy = 0;
+      snakeColor = 0;
+      foodColor = '#0f0';
+
+      score = 0;
+      
+      snakeSize = 30;
+      growthPerFood = 30;
+      snakeSpeed = 3;
+      // create a random position for the food
+      [foodX, foodY] = randomPosition();
+
+      playing = true;
+
+      draw();
+    }  
+    var draw = function() {
+      ctx.clearRect(0, 0, 600, 600);
+      
+      // draw the snake
+      for (var i = snake.length-1; i >= 0; i--) {
+        // create sin wave from i to snake.length
+        var sin = Math.sin(i/30*Math.PI);
+        ctx.fillStyle = 'hsl('+ 30*sin +',100%,50%)';
+        //snakeColor;
+        ctx.fillRect(snake[i].x, snake[i].y, squareSize, squareSize);
+      }
+      
+      
+      ctx.fillStyle = foodColor;
+      ctx.fillRect(foodX, foodY, squareSize, squareSize);
+      
+
+
+      drawing = requestAnimationFrame(draw);
+      update();
+    }
+    update = function() {
+      moveSnake()
+
+      checkGameOver();
+
+      checkEat();
+
+    }
+
+    gameOver = function () {
+      //alert('Game Over');
+      // setup();
+      cancelAnimationFrame(drawing)
+      playing = false;
+      
+      updates.innerText = 'Game Over';
+      setTimeout(function() {
+        updates.innerText = '';
+      }, 1000);
+
+    }   
+
+    checkGameOver = function () {
+
+      // if snake hits edge, wrap around
+      if (x+squareSize > canvas.width) {
+        gameOver();
+      }
+      if (x < 0) {
+        gameOver();
+      }
+      if (y+squareSize > canvas.height) {
+        gameOver()
+      }
+      if (y < 0) {
+        gameOver();
+      }
+
+      // check if snake overlaps itself
+      for (var i = Math.floor(3*squareSize/snakeSpeed); i < snake.length; i++) {
+        if (overlaps(x,y, snake[i].x , snake[i].y)) {
+          // if it does, end the game
+          gameOver();
+        }
+      }
+    }
+
+    overlaps = function(x, y, tx, ty) {
+      return (x+squareSize > tx && x<tx+squareSize && y+squareSize>ty && y< ty+squareSize);
+    }
+
+    moveSnake = function() {
+      if(!controlWithMouse){
+        // change direction based on keys pressed
+        if (keys[37] && dx === 0) {
+          dx = -1;
+          dy = 0;
+        } else if (keys[38] && dy === 0) {
+          dx = 0;
+          dy = -1;
+        } else if (keys[39] && dx === 0) {
+          dx = 1;
+          dy = 0;
+        } else if (keys[40] && dy === 0) {
+          dx = 0;
+          dy = 1;
+        }
+      }else if(controlWithMouse){
+        if(mouseMoved){
+          // change direction based on mouse position
+          let xdiff = mx - x;
+          let ydiff = my - y;
+  
+          // set dx and dy to point to the mouse
+          let distanceToMouse = Math.sqrt(xdiff*xdiff + ydiff*ydiff);
+          dx = xdiff/distanceToMouse;
+          dy = ydiff/distanceToMouse;
+          mouseMoved = false
+        }
+      }
+
+      x += dx * snakeSpeed;
+      y += dy * snakeSpeed;
+      
+      // // if snake hits edge, wrap around
+      // if (x > canvas.width) {
+      //   x = 0;
+      // }
+      // if (x < 0) {
+      //   x = canvas.width;
+      // }
+      // if (y > canvas.height) {
+      //   y = 0;
+      // }
+      // if (y < 0) {
+      //   y = canvas.height;
+      // }
+
+      // move the snake by adding the current position to the front of the array
+      snake.unshift({x: x, y: y});
+      // and removing the last item from the array if the snake size is greater than snakeLength
+      if (snake.length > snakeSize) {
+        snake.pop();
+      }
+    }
+
+    checkEat = function() {
+      // check if the snake overlaps the food
+      if (overlaps(x, y, foodX, foodY)) {
+        // if it does, create a new food
+        [foodX, foodY] = randomPosition();
+        // and increase the snake's size
+        snakeSize+=growthPerFood;
+        snakeSpeed+=0.5;
+      }
+    }
+
+    randomPosition = function() {
+      return [
+        Math.floor(Math.random() * (canvas.width - squareSize)),
+        Math.floor(Math.random() * (canvas.height - squareSize))
+      ];
+    } 
+     
+  </script>
+</body>
+</html>
