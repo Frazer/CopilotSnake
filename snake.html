@@ -6,23 +6,43 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Document</title>
 </head>
-<body>
-  <canvas id="canvas" width="600" height="600" style="border: 1px solid black"></canvas>
+<body style="margin: 0; overflow: hidden; ">
+  <canvas id="canvas" style="border: 1px solid black"></canvas>
   <div class="updates"></div>
   <script>
     var updates = document.querySelector('.updates');
     var canvas = document.getElementById('canvas');
+
+    let gameSize = 300;
+    updateCanvasSize = function() {
+      let actualGameHeight = Math.min(gameSize, window.innerHeight - 12);
+      let actualGameWidth = Math.min(gameSize, window.innerWidth - 12);
+      let topMargin = (window.innerHeight - actualGameHeight)/2 -1;
+      let sideMargin = (window.innerWidth - actualGameWidth)/2 -1;
+      canvas.style.margin = topMargin + 'px ' + sideMargin + 'px';
+      canvas.width = actualGameWidth;
+      canvas.height = actualGameHeight;
+    }
+    updateCanvasSize();
     var ctx = canvas.getContext('2d');
-    let x,y,snake,dx,dy, mx, my,
-      snakeColor,foodColor,snakeSize,foodX,
-      foodY, growthPerFood, snakeSpeed, squareSize, 
-      keys=[], drawing, score, highScore, playing, controlWithMouse, mouseMoved;
+    let x,y,snake,dx,dy, pl, pr, pu, pd, mx, my,
+    snakeColor,foodColor,snakeSize,foodX,
+    foodY, growthPerFood, snakeSpeed, squareSize, 
+    keys=[], drawing, score, highScore, playing, controlWithMouse, 
+    mouseMovedSoTurn, mouseMove, xdiff, ydiff,
+    enableWrap, precisionAngle, tagertAngle;
+    let happySounds = [new Audio('hooray.mp3'), new Audio('myammyam.mp3'), new Audio('woohoo.mp3'),new Audio('yumyum.mp3')];
+    let deathSounds = [new Audio('ohno.mp3')];
     
     // add keylistener to keep track of latest key pressed
     document.addEventListener('keydown', function(event) {
+      controlWithMouse = false;
       keys[event.keyCode] = true;
       if(playing!==true){
-        setup();
+        // check if event is space or enter or an arrow key
+        if(event.keyCode === 13 || (event.keyCode >=37 && event.keyCode <= 40 ) || event.keyCode === 32){
+          setup();
+        }
       }
     });
     
@@ -34,18 +54,26 @@
     canvas.addEventListener('mousemove', function(event) {
       mx = event.offsetX;
       my = event.offsetY;
-      mouseMoved = true;
+      mouseMovedSoTurn = true;
+      mouseMove = true;
     } );
 
     // add a mouseDown listener to start the game
     canvas.addEventListener('mousedown', function(event) {
+      controlWithMouse = true;
+      delete pr;
+      delete pu;
+      delete pd;
+      delete pl;
+
       if(playing!==true){
         setup(true);
       }
     } );
     
-    function setup(Mouse =false) {
-      controlWithMouse = Mouse;
+    function setup() {
+      gameSize = 300;
+      updateCanvasSize();
       squareSize = 20;
       // create random start position for the snake
       [x, y] = randomPosition();
@@ -57,12 +85,19 @@
       dy = 0;
       snakeColor = 0;
       foodColor = '#0f0';
-
+      enableWrap = false;
       score = 0;
+      delete pr;
+      delete pu;
+      delete pd;
+      delete pl;
       
-      snakeSize = 30;
+      snakeSize = 90;
       growthPerFood = 30;
-      snakeSpeed = 3;
+      snakeSpeed = 2;
+      precisionAngle = Math.PI/squareSize/3*snakeSpeed;
+      xDiff = 1; yDiff = 0;
+      tagertAngle = 0;
       // create a random position for the food
       [foodX, foodY] = randomPosition();
 
@@ -71,7 +106,7 @@
       draw();
     }  
     var draw = function() {
-      ctx.clearRect(0, 0, 600, 600);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
       
       // draw the snake
       for (var i = snake.length-1; i >= 0; i--) {
@@ -100,33 +135,34 @@
 
     }
 
-    gameOver = function () {
-      //alert('Game Over');
-      // setup();
+    gameOver = function () {      
+      deathSound();
       cancelAnimationFrame(drawing)
       playing = false;
       
       updates.innerText = 'Game Over';
       setTimeout(function() {
         updates.innerText = '';
-      }, 1000);
+      }, 5000);
 
     }   
 
     checkGameOver = function () {
 
-      // if snake hits edge, wrap around
-      if (x+squareSize > canvas.width) {
-        gameOver();
-      }
-      if (x < 0) {
-        gameOver();
-      }
-      if (y+squareSize > canvas.height) {
-        gameOver()
-      }
-      if (y < 0) {
-        gameOver();
+      if(!enableWrap){
+        // if snake hits edge, gameover
+        if (x+squareSize > canvas.width) {
+          gameOver();
+        }
+        if (x < 0) {
+          gameOver();
+        }
+        if (y+squareSize > canvas.height) {
+          gameOver()
+        }
+        if (y < 0) {
+          gameOver();
+        }
       }
 
       // check if snake overlaps itself
@@ -145,49 +181,97 @@
     moveSnake = function() {
       if(!controlWithMouse){
         // change direction based on keys pressed
-        if (keys[37] && dx === 0) {
+        if (keys[37] && dx < 0.3 && (!pr || (y+squareSize<pr || y> pr+squareSize))) {
           dx = -1;
           dy = 0;
-        } else if (keys[38] && dy === 0) {
+          pl = y;
+          delete pr;
+        } else if (keys[38] && dy < 0.3  && (!pu || (x+squareSize<pu || x> pu+squareSize))) {
           dx = 0;
           dy = -1;
-        } else if (keys[39] && dx === 0) {
+          pd = x;
+          delete pu;
+        } else if (keys[39] && dx > -0.3 && (!pl || (y+squareSize<pl || y>pl+squareSize))) {
           dx = 1;
           dy = 0;
-        } else if (keys[40] && dy === 0) {
+          pr = y;
+          delete pl;
+        } else if (keys[40] && dy > -0.3 && (!pd || (x+squareSize < pd || x> pd+squareSize))) {
           dx = 0;
           dy = 1;
+          pu = x;
+          delete pd;
         }
       }else if(controlWithMouse){
-        if(mouseMoved){
-          // change direction based on mouse position
-          let xdiff = mx - x;
-          let ydiff = my - y;
-  
-          // set dx and dy to point to the mouse
-          let distanceToMouse = Math.sqrt(xdiff*xdiff + ydiff*ydiff);
-          dx = xdiff/distanceToMouse;
-          dy = ydiff/distanceToMouse;
-          mouseMoved = false
+        if(mouseMovedSoTurn){
+          if(mouseMove){
+            // change direction based on mouse position
+            xdiff = mx - x;
+            ydiff = my - y;
+            // find angle between current pos and mouse position
+            targetAngle = Math.atan2(ydiff, xdiff);
+            mouseMove = false;
+          }
+
+          // ensure new angle isn't more than 90 degrees from current angle
+          // find angle of current direction
+          let currentAngle = Math.atan2(dy, dx);
+            
+          let angleDiff = Math.abs(targetAngle - currentAngle);
+          if(angleDiff> Math.PI){
+            angleDiff = Math.PI*2 - angleDiff;
+          }
+          if(angleDiff < precisionAngle){
+            // // set dx and dy to point to the mouse
+            let distanceToMouse = Math.sqrt(xdiff*xdiff + ydiff*ydiff);
+            dx = xdiff/distanceToMouse;
+            dy = ydiff/distanceToMouse;
+            mouseMovedSoTurn = false;
+          }else{
+                    
+            if(targetAngle < currentAngle){
+              targetAngle += 2* Math.PI;
+            }
+            // rotate currentAngle towards targetAngle
+            let newAngle = 0;
+            let turnAngle = precisionAngle;
+            if(targetAngle - currentAngle > Math.PI){
+              if(targetAngle - currentAngle < Math.PI*1.1){
+                turnAngle /= 10;
+              }
+              newAngle = currentAngle - turnAngle;
+            }else{
+              if(targetAngle - currentAngle > Math.PI*0.9){
+                turnAngle /= 10;
+              }
+              
+              newAngle = currentAngle + turnAngle;
+              
+            }
+
+            dx = Math.cos(newAngle);
+            dy = Math.sin(newAngle);
+          }
         }
       }
 
       x += dx * snakeSpeed;
       y += dy * snakeSpeed;
-      
-      // // if snake hits edge, wrap around
-      // if (x > canvas.width) {
-      //   x = 0;
-      // }
-      // if (x < 0) {
-      //   x = canvas.width;
-      // }
-      // if (y > canvas.height) {
-      //   y = 0;
-      // }
-      // if (y < 0) {
-      //   y = canvas.height;
-      // }
+      if(enableWrap){
+        // if snake hits edge, wrap around
+        if (x > canvas.width) {
+          x = 0;
+        }
+        if (x < 0) {
+          x = canvas.width;
+        }
+        if (y > canvas.height) {
+          y = 0;
+        }
+        if (y < 0) {
+          y = canvas.height;
+        }
+      }
 
       // move the snake by adding the current position to the front of the array
       snake.unshift({x: x, y: y});
@@ -197,14 +281,32 @@
       }
     }
 
+    // a function to generate a happy sound
+    happySound = function () {
+      happySounds[Math.floor(Math.random() * happySounds.length)].play();
+    }
+
+    // a function to generate a death sound
+    deathSound = function () {
+      deathSounds[Math.floor(Math.random() * deathSounds.length)].play();
+    }
+
     checkEat = function() {
       // check if the snake overlaps the food
       if (overlaps(x, y, foodX, foodY)) {
+        happySound();
         // if it does, create a new food
         [foodX, foodY] = randomPosition();
         // and increase the snake's size
         snakeSize+=growthPerFood;
         snakeSpeed+=0.5;
+        precisionAngle = Math.PI/squareSize/3*snakeSpeed;
+        gameSize += 50;
+        snake.forEach(p=>{p.x+=25; p.y+=25;});
+        x+=25;
+        y+=25;
+        updateCanvasSize();
+      
       }
     }
 
