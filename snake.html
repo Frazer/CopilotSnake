@@ -9,12 +9,34 @@
 <body style="margin: 0; overflow: hidden; ">
   <canvas id="canvas" style="border: 1px solid black"></canvas>
   <div class="updates"></div>
+  <style>
+    .updates {
+      position: fixed;
+      width: 100vw; 
+      display: flex;
+      top: 46%;
+      justify-content: center;
+    }
+  </style>
   <script>
+    let startText = `<div><h1>Play with arrows or mouse</h1>
+    <br>
+    <h1>Push an arrow key or click to start</h1></div>`;
     var updates = document.querySelector('.updates');
+
+
+    updates.innerHTML = startText;
     var canvas = document.getElementById('canvas');
 
-    let gameSize = 300;
+    let gameSize = 250;
+    let gameGrowSize = 50;
     updateCanvasSize = function() {
+      // Check if growing gameSize would extend outside screen
+      let spacex = Math.max(0, window.innerHeight - 12 - gameSize);
+      let spacey = Math.max(0, window.innerHeight - 12 - gameSize);
+      let difx = Math.min(spacex / 2, gameGrowSize / 2);
+      let dify = Math.min(spacey / 2, gameGrowSize / 2);
+      gameSize += gameGrowSize;
       let actualGameHeight = Math.min(gameSize, window.innerHeight - 12);
       let actualGameWidth = Math.min(gameSize, window.innerWidth - 12);
       let topMargin = (window.innerHeight - actualGameHeight)/2 -1;
@@ -22,6 +44,7 @@
       canvas.style.margin = topMargin + 'px ' + sideMargin + 'px';
       canvas.width = actualGameWidth;
       canvas.height = actualGameHeight;
+      return [difx,dify];
     }
     updateCanvasSize();
     var ctx = canvas.getContext('2d');
@@ -39,6 +62,8 @@
       controlWithMouse = false;
       keys[event.keyCode] = true;
       if(playing!==true){
+        updates.style.display="none";
+
         // check if event is space or enter or an arrow key
         if(event.keyCode === 13 || (event.keyCode >=37 && event.keyCode <= 40 ) || event.keyCode === 32){
           setup();
@@ -51,7 +76,7 @@
     });
 
     // add a mouseMove listener to keep track of mouse position
-    canvas.addEventListener('mousemove', function(event) {
+    document.addEventListener('mousemove', function(event) {
       mx = event.offsetX;
       my = event.offsetY;
       mouseMovedSoTurn = true;
@@ -59,7 +84,7 @@
     } );
 
     // add a mouseDown listener to start the game
-    canvas.addEventListener('mousedown', function(event) {
+    document.addEventListener('mousedown', function(event) {
       controlWithMouse = true;
       delete pr;
       delete pu;
@@ -67,22 +92,23 @@
       delete pl;
 
       if(playing!==true){
+        updates.style.display="none";
         setup(true);
       }
     } );
     
     function setup() {
-      gameSize = 300;
+      gameSize = 250;
       updateCanvasSize();
       squareSize = 20;
       // create random start position for the snake
       [x, y] = randomPosition();
       // start on left half of the screen
+      dx = 1;
+      dy = 0;
       x/=2;
       snake = [{x: x, y: y}];
       keys=[];
-      dx = 1;
-      dy = 0;
       snakeColor = 0;
       foodColor = '#0f0';
       enableWrap = false;
@@ -94,7 +120,7 @@
       
       snakeSize = 90;
       growthPerFood = 30;
-      snakeSpeed = 2;
+      snakeSpeed = 2.5;
       precisionAngle = Math.PI/squareSize/3*snakeSpeed;
       xDiff = 1; yDiff = 0;
       tagertAngle = 0;
@@ -105,6 +131,7 @@
 
       draw();
     }  
+
     var draw = function() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       
@@ -112,20 +139,20 @@
       for (var i = snake.length-1; i >= 0; i--) {
         // create sin wave from i to snake.length
         var sin = Math.sin(i/30*Math.PI);
-        ctx.fillStyle = 'hsl('+ 30*sin +',100%,50%)';
-        //snakeColor;
+        ctx.fillStyle = 'hsl('+ (snakeColor + 30*sin) +',100%,50%)';
         ctx.fillRect(snake[i].x, snake[i].y, squareSize, squareSize);
       }
-      
-      
+      snakeColor+=0.01;
+      if(snakeColor > 60 && snakeColor < 180){ snakeColor+=1;}
+      if(snakeColor > 360){ snakeColor -= 360;}
+
       ctx.fillStyle = foodColor;
       ctx.fillRect(foodX, foodY, squareSize, squareSize);
       
-
-
       drawing = requestAnimationFrame(draw);
       update();
     }
+    
     update = function() {
       moveSnake()
 
@@ -138,11 +165,13 @@
     gameOver = function () {      
       deathSound();
       cancelAnimationFrame(drawing)
-      playing = false;
       
-      updates.innerText = 'Game Over';
+      updates.style.display="flex";
+
+      updates.innerText = 'Game Over\n\nScore: '+score;
       setTimeout(function() {
-        updates.innerText = '';
+        playing = false;
+        updates.innerHTML = startText;
       }, 5000);
 
     }   
@@ -299,13 +328,13 @@
         [foodX, foodY] = randomPosition();
         // and increase the snake's size
         snakeSize+=growthPerFood;
-        snakeSpeed+=0.5;
-        precisionAngle = Math.PI/squareSize/3*snakeSpeed;
-        gameSize += 50;
-        snake.forEach(p=>{p.x+=25; p.y+=25;});
-        x+=25;
-        y+=25;
-        updateCanvasSize();
+        score += snakeSize;
+        snakeSpeed+=0.2;
+        // precisionAngle = Math.PI/squareSize/3*snakeSpeed;
+        let [gx,gy] = updateCanvasSize();
+        snake.forEach(p=>{p.x+=gx; p.y+=gy;});
+        x+=gx;
+        y+=gy;
       
       }
     }
