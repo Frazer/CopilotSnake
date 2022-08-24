@@ -53,7 +53,7 @@
     foodY, growthPerFood, snakeSpeed, squareSize, 
     keys=[], drawing, score, highScore, playing, controlWithMouse, 
     mouseMovedSoTurn, mouseMove, xdiff, ydiff,
-    enableWrap, precisionAngle, tagertAngle;
+    enableWrap, precisionAngle, tagertAngle, scoreScreenOn;
     let happySounds = [new Audio('hooray.mp3'), new Audio('myammyam.mp3'), new Audio('woohoo.mp3'),new Audio('yumyum.mp3')];
     let deathSounds = [new Audio('ohno.mp3')];
     
@@ -68,6 +68,9 @@
         if(event.keyCode === 13 || (event.keyCode >=37 && event.keyCode <= 40 ) || event.keyCode === 32){
           setup();
         }
+      }
+      if(scoreScreenOn && ( event.keyCode === 32 || event.keyCode === 13)){
+          closeScoreScreen();
       }
     });
     
@@ -162,6 +165,12 @@
 
     }
 
+    closeScoreScreen =  function() {
+      clearTimeout(scoreScreenOn);
+      scoreScreenOn = playing = false;
+      updates.innerHTML = startText;
+    }
+
     gameOver = function () {      
       deathSound();
       cancelAnimationFrame(drawing)
@@ -169,10 +178,7 @@
       updates.style.display="flex";
 
       updates.innerText = 'Game Over\n\nScore: '+score;
-      setTimeout(function() {
-        playing = false;
-        updates.innerHTML = startText;
-      }, 5000);
+      scoreScreenOn = setTimeout(closeScoreScreen, 20000);
 
     }   
 
@@ -199,6 +205,7 @@
         if (overlaps(x,y, snake[i].x , snake[i].y)) {
           // if it does, end the game
           gameOver();
+          break;
         }
       }
     }
