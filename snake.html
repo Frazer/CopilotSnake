@@ -273,13 +273,13 @@
             let newAngle = 0;
             let turnAngle = precisionAngle;
             if(targetAngle - currentAngle > Math.PI){
-              if(targetAngle - currentAngle < Math.PI*1.1){
-                turnAngle /= 10;
+              if(targetAngle - currentAngle < Math.PI*1.2){
+                turnAngle /= 8;
               }
               newAngle = currentAngle - turnAngle;
             }else{
-              if(targetAngle - currentAngle > Math.PI*0.9){
-                turnAngle /= 10;
+              if(targetAngle - currentAngle > Math.PI*0.8){
+                turnAngle /= 8;
               }
               
               newAngle = currentAngle + turnAngle;
@@ -337,7 +337,7 @@
         // and increase the snake's size
         snakeSize+=growthPerFood;
         score += snakeSize;
-        snakeSpeed+=0.5;
+        snakeSpeed+=0.3;
         // precisionAngle = Math.PI/squareSize/3*snakeSpeed;
         let [gx,gy] = updateCanvasSize();
         snake.forEach(p=>{p.x+=gx; p.y+=gy;});
