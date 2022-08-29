@@ -123,7 +123,7 @@
       
       snakeSize = 90;
       growthPerFood = 30;
-      snakeSpeed = 2.5;
+      snakeSpeed = 1;
       precisionAngle = Math.PI/squareSize/3*snakeSpeed;
       xDiff = 1; yDiff = 0;
       tagertAngle = 0;
@@ -179,7 +179,7 @@
       updates.style.display="flex";
 
       updates.innerText = 'Game Over\n\nScore: '+score;
-      scoreScreenOn = setTimeout(closeScoreScreen, 20000);
+      scoreScreenOn = setTimeout(closeScoreScreen, 6000);
 
     }   
 
@@ -337,7 +337,7 @@
         // and increase the snake's size
         snakeSize+=growthPerFood;
         score += snakeSize;
-        snakeSpeed+=0.2;
+        snakeSpeed+=0.5;
         // precisionAngle = Math.PI/squareSize/3*snakeSpeed;
         let [gx,gy] = updateCanvasSize();
         snake.forEach(p=>{p.x+=gx; p.y+=gy;});
