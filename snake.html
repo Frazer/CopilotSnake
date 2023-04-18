@@ -30,13 +30,15 @@
 
     let gameSize = 250;
     let gameGrowSize = 50;
-    updateCanvasSize = function() {
+    updateCanvasSize = function(dontGrow) {
       // Check if growing gameSize would extend outside screen
       let spacex = Math.max(0, window.innerWidth - 12 - gameSize);
       let spacey = Math.max(0, window.innerHeight - 12 - gameSize);
       let difx = Math.min(spacex / 2, gameGrowSize / 2);
       let dify = Math.min(spacey / 2, gameGrowSize / 2);
-      gameSize += gameGrowSize;
+      if(!dontGrow){
+        gameSize += gameGrowSize;
+      }
       let actualGameHeight = Math.min(gameSize, window.innerHeight - 12);
       let actualGameWidth = Math.min(gameSize, window.innerWidth - 12);
       let topMargin = (window.innerHeight - actualGameHeight)/2 -1;
@@ -98,6 +100,10 @@
         updates.style.display="none";
         setup(true);
       }
+    } );
+    
+    window.addEventListener('resize', function(event) {
+      updateCanvasSize(true);
     } );
     
     function setup() {
