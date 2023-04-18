@@ -208,7 +208,8 @@
       }
 
       // check if snake overlaps itself
-      for (var i = Math.floor(3*squareSize/snakeSpeed); i < snake.length; i++) {
+      let snakeHeadDistance = Math.floor(3*squareSize/snakeSpeed);
+      for (var i = snakeHeadDistance; i < snake.length; i++) {
         if (overlaps(x,y, snake[i].x , snake[i].y)) {
           // if it does, end the game
           gameOver();
