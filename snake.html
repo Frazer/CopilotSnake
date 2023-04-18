@@ -19,7 +19,7 @@
     }
   </style>
   <script>
-    let startText = `<div><h1>Play with arrows or mouse</h1>
+    let startText = `<div><h1>Play with arrows and/or mouse</h1>
     <br>
     <h1>Push an arrow key or click to start</h1></div>`;
     var updates = document.querySelector('.updates');
@@ -122,10 +122,10 @@
       foodColor = '#0f0';
       enableWrap = false;
       score = 0;
-      delete pr;
-      delete pu;
-      delete pd;
-      delete pl;
+      pr = y;
+      pu = undefined;
+      pd = undefined;
+      pl = undefined;
       
       snakeSize = 90;
       growthPerFood = 30;
@@ -185,7 +185,7 @@
       
       updates.style.display="flex";
 
-      updates.innerText = 'Game Over\n\nScore: '+score;
+      updates.innerText = 'Game Over\n\nScore: '+score+'\nHighscore: '+highScore+'\n\nPress space or enter to play again';
       scoreScreenOn = setTimeout(closeScoreScreen, 6000);
 
     }   
@@ -345,6 +345,9 @@
         // and increase the snake's size
         snakeSize+=growthPerFood;
         score += snakeSize;
+        if(score > highScore){
+          highScore = score;
+        }
         snakeSpeed+=snakeSpeedup;
         // precisionAngle = Math.PI/squareSize/3*snakeSpeed;
         let [gx,gy] = updateCanvasSize();
