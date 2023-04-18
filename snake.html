@@ -52,7 +52,7 @@
     var ctx = canvas.getContext('2d');
     let x,y,snake,dx,dy, pl, pr, pu, pd, mx, my,
     snakeColor,foodColor,snakeSize,foodX,
-    foodY, growthPerFood, snakeSpeed, squareSize, 
+    foodY, growthPerFood, snakeSpeed, snakeSpeedup, squareSize, 
     keys=[], drawing, score, highScore, playing, controlWithMouse, 
     mouseMovedSoTurn, mouseMove, xdiff, ydiff,
     enableWrap, precisionAngle, tagertAngle, scoreScreenOn;
@@ -130,6 +130,7 @@
       snakeSize = 90;
       growthPerFood = 30;
       snakeSpeed = 1;
+      snakeSpeedup = 0.3;
       precisionAngle = Math.PI/squareSize/3*snakeSpeed;
       xDiff = 1; yDiff = 0;
       tagertAngle = 0;
@@ -229,23 +230,23 @@
           dx = -1;
           dy = 0;
           pl = y;
-          delete pr;
+          pr = undefined;
         } else if (keys[38] && dy < 0.3  && (!pu || (x+squareSize<pu || x> pu+squareSize))) {
           dx = 0;
           dy = -1;
           pd = x;
-          delete pu;
+          pu = undefined;
         } else if (keys[39] && dx > -0.3 && (!pl || (y+squareSize<pl || y>pl+squareSize))) {
           dx = 1;
           dy = 0;
           pr = y;
-          delete pl;
+          pl = undefined;
         } else if (keys[40] && dy > -0.3 && (!pd || (x+squareSize < pd || x> pd+squareSize))) {
           dx = 0;
           dy = 1;
           pu = x;
-          delete pd;
-        }
+          pd = undefined;
+        }        
       }else if(controlWithMouse){
         if(mouseMovedSoTurn){
           if(mouseMove){
@@ -344,7 +345,7 @@
         // and increase the snake's size
         snakeSize+=growthPerFood;
         score += snakeSize;
-        snakeSpeed+=0.3;
+        snakeSpeed+=snakeSpeedup;
         // precisionAngle = Math.PI/squareSize/3*snakeSpeed;
         let [gx,gy] = updateCanvasSize();
         snake.forEach(p=>{p.x+=gx; p.y+=gy;});
