@@ -72,10 +72,9 @@
           closeScoreScreen();
         }
       } else if(playing!==true){
-        updates.style.display="none";
-
         // check if event is space or enter or an arrow key
         if(event.keyCode === 13 || (event.keyCode >=37 && event.keyCode <= 40 ) || event.keyCode === 32){
+          updates.style.display="none";
           setup();
         }
       }
