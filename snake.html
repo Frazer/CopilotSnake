@@ -7,19 +7,23 @@
   <title>Super snake game</title>
 </head>
 <body style="margin: 0; overflow: hidden; ">
-  <canvas id="canvas" style="border: 1px solid lightgrey"></canvas>
+  <canvas id="canvas"></canvas>
   <div class="updates"></div>
   <style>
     .updates {
       position: fixed;
       width: 100vw; 
       display: flex;
-      top: 46%;
+      top: 36%;
       justify-content: center;
+    }
+
+    .canvasBorder {
+      border: 1px solid lightgrey;
     }
   </style>
   <script>
-    let startText = `<div><h1>Play with arrows and/or mouse</h1>
+    let startText = `<div><h1>SnakeGame</h1><br><br><h1>Play with arrows and/or mouse</h1>
     <br>
     <h1>Push an arrow key or click to start</h1></div>`;
     var updates = document.querySelector('.updates');
@@ -132,6 +136,7 @@
     } );
     
     function setup() {
+      canvas.classList.toggle('canvasBorder');
       gameSize = 250;
       closeScoreScreen();
       updateCanvasSize();
@@ -209,6 +214,7 @@
 
     gameOver = function () {      
       playing = false;
+      canvas.classList.toggle('canvasBorder');
       deathSound();
       
       updates.style.display="flex";
