@@ -53,7 +53,7 @@
     let x,y,snake,dx,dy, pl, pr, pu, pd, mx, my,
     snakeColor,foodColor,snakeSize,foodX,
     foodY, growthPerFood, snakeSpeed, snakeSpeedup, squareSize, 
-    keys=[], drawing, score, highScore, playing, controlWithMouse, 
+    keys=[], drawing, score, highScore=0, playing, controlWithMouse, 
     mouseMovedSoTurn, mouseMove, xdiff, ydiff,
     enableWrap, precisionAngle, tagertAngle, scoreScreenOn;
     let happySounds = [new Audio('hooray.mp3'), new Audio('myammyam.mp3'), new Audio('woohoo.mp3'),new Audio('yumyum.mp3')];
@@ -63,16 +63,17 @@
     document.addEventListener('keydown', function(event) {
       controlWithMouse = false;
       keys[event.keyCode] = true;
-      if(playing!==true){
+      if(scoreScreenOn){
+        if( event.keyCode === 32 || event.keyCode === 13){
+          closeScoreScreen();
+        }
+      } else if(playing!==true){
         updates.style.display="none";
 
         // check if event is space or enter or an arrow key
         if(event.keyCode === 13 || (event.keyCode >=37 && event.keyCode <= 40 ) || event.keyCode === 32){
           setup();
         }
-      }
-      if(scoreScreenOn && ( event.keyCode === 32 || event.keyCode === 13)){
-          closeScoreScreen();
       }
     });
     
@@ -139,7 +140,7 @@
 
       playing = true;
 
-      draw();
+      tick();
     }  
 
     var draw = function() {
@@ -158,9 +159,6 @@
 
       ctx.fillStyle = foodColor;
       ctx.fillRect(foodX, foodY, squareSize, squareSize);
-      
-      drawing = requestAnimationFrame(draw);
-      update();
     }
     
     update = function() {
@@ -172,6 +170,14 @@
 
     }
 
+    tick = function() {
+      draw();
+      update();
+      if(playing){
+        drawing = requestAnimationFrame(tick);
+      }
+    }
+
     closeScoreScreen =  function() {
       clearTimeout(scoreScreenOn);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -180,14 +186,13 @@
     }
 
     gameOver = function () {      
+      playing = false;
       deathSound();
-      cancelAnimationFrame(drawing)
       
       updates.style.display="flex";
 
       updates.innerText = 'Game Over\n\nScore: '+score+'\nHighscore: '+highScore+'\n\nPress space or enter to play again';
       scoreScreenOn = setTimeout(closeScoreScreen, 6000);
-
     }   
 
     checkGameOver = function () {
@@ -247,7 +252,7 @@
           pu = x;
           pd = undefined;
         }        
-      }else if(controlWithMouse){
+      } else {
         if(mouseMovedSoTurn){
           if(mouseMove){
             // change direction based on mouse position
@@ -341,7 +346,14 @@
       if (overlaps(x, y, foodX, foodY)) {
         happySound();
         // if it does, create a new food
-        [foodX, foodY] = randomPosition();
+        let newRandomPosition;
+        for(let i = 0; i < 100; i++){
+          newRandomPosition = randomPosition();
+          if(!snake.some(p=>overlaps(p.x, p.y, newRandomPosition[0], newRandomPosition[1]))){
+            break;
+          }
+        }
+        [foodX, foodY] = newRandomPosition;
         // and increase the snake's size
         snakeSize+=growthPerFood;
         score += snakeSize;
@@ -352,6 +364,8 @@
         // precisionAngle = Math.PI/squareSize/3*snakeSpeed;
         let [gx,gy] = updateCanvasSize();
         snake.forEach(p=>{p.x+=gx; p.y+=gy;});
+        foodX+=gx;
+        foodY+=gy;
         x+=gx;
         y+=gy;
       
