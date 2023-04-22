@@ -87,32 +87,45 @@
       }
     });
 
-    // add a mouseMove listener to keep track of mouse position
-    document.addEventListener('mousemove', function(event) {
-      mx = event.offsetX;
-      my = event.offsetY;
+    getMxMy = function(){
+       // find if the mouse is on the canvas, and make offset releative to canvas
+       let rect = canvas.getBoundingClientRect();
+      if(event.target !== canvas){
+        mx = event.offsetX - rect.left;
+      }else {
+        mx = event.offsetX;
+      }
+      
+      if(event.target !== canvas){
+        my = event.offsetY - rect.top;
+      } else {
+        my = event.offsetY;
+      }
+
       mouseMovedSoTurn = true;
       mouseMove = true;
+    }
+
+    // add a mouseMove listener to keep track of mouse position
+    document.addEventListener('mousemove', function(event) {
+      getMxMy();
     } );
 
-    // add a mouseDown listener to start the game
+    // add a mouseDown listener to start the game or activate the mouse control
     document.addEventListener('mousedown', function(event) {
       controlWithMouse = true;
       delete pr;
       delete pu;
       delete pd;
       delete pl;
-      mx = event.offsetX;
-      my = event.offsetY;
-      mouseMovedSoTurn = true;
-      mouseMove = true;
 
+      getMxMy();
 
       if(playing!==true){
         updates.style.display="none";
         setup(true);
       }
-    } );
+    });
     
     window.addEventListener('resize', function(event) {
       updateCanvasSize(true);
