@@ -24,6 +24,10 @@
     <h1>Push an arrow key or click to start</h1></div>`;
     var updates = document.querySelector('.updates');
 
+    const LEFT = 37;
+    const UP = 38;
+    const RIGHT = 39;
+    const DOWN = 40;
 
     updates.innerHTML = startText;
     var canvas = document.getElementById('canvas');
@@ -234,30 +238,30 @@
     moveSnake = function() {
       if(!controlWithMouse){
         // change direction based on keys pressed
-        if (keys[37] && dx < 0.3 && (!pr || (y+squareSize<pr || y> pr+squareSize))) {
+        if (keys[LEFT] && dx < 0.3 && (!pr || (y+squareSize<pr || y> pr+squareSize))) {
           dx = -1;
           dy = 0;
           pl = y;
           pr = undefined;
-          keys[37] = false;
-        } else if (keys[38] && dy < 0.3  && (!pu || (x+squareSize<pu || x> pu+squareSize))) {
+          keys[LEFT] = false;
+        } else if (keys[UP] && dy < 0.3  && (!pu || (x+squareSize<pu || x> pu+squareSize))) {
           dx = 0;
           dy = -1;
           pd = x;
           pu = undefined;
-          keys[38] = false;
-        } else if (keys[39] && dx > -0.3 && (!pl || (y+squareSize<pl || y>pl+squareSize))) {
+          keys[UP] = false;
+        } else if (keys[RIGHT] && dx > -0.3 && (!pl || (y+squareSize<pl || y>pl+squareSize))) {
           dx = 1;
           dy = 0;
           pr = y;
           pl = undefined;
-          keys[39] = false;
-        } else if (keys[40] && dy > -0.3 && (!pd || (x+squareSize < pd || x> pd+squareSize))) {
+          keys[RIGHT] = false;
+        } else if (keys[DOWN] && dy > -0.3 && (!pd || (x+squareSize < pd || x> pd+squareSize))) {
           dx = 0;
           dy = 1;
           pu = x;
           pd = undefined;
-          keys[40] = false;
+          keys[DOWN] = false;
         }        
       } else {
         if(mouseMovedSoTurn){
