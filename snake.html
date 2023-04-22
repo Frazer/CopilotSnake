@@ -78,7 +78,10 @@
     });
     
     document.addEventListener('keyup', function(event) {
-      keys[event.keyCode] = false;
+      //arrow keys will beprocessed in moveSnake()
+      if(event.keyCode <37 && event.keyCode > 40 ){
+        keys[event.keyCode] = false;
+      }
     });
 
     // add a mouseMove listener to keep track of mouse position
@@ -236,21 +239,25 @@
           dy = 0;
           pl = y;
           pr = undefined;
+          keys[37] = false;
         } else if (keys[38] && dy < 0.3  && (!pu || (x+squareSize<pu || x> pu+squareSize))) {
           dx = 0;
           dy = -1;
           pd = x;
           pu = undefined;
+          keys[38] = false;
         } else if (keys[39] && dx > -0.3 && (!pl || (y+squareSize<pl || y>pl+squareSize))) {
           dx = 1;
           dy = 0;
           pr = y;
           pl = undefined;
+          keys[39] = false;
         } else if (keys[40] && dy > -0.3 && (!pd || (x+squareSize < pd || x> pd+squareSize))) {
           dx = 0;
           dy = 1;
           pu = x;
           pd = undefined;
+          keys[40] = false;
         }        
       } else {
         if(mouseMovedSoTurn){
