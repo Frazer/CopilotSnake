@@ -361,12 +361,12 @@
             let newAngle = 0;
             let turnAngle = precisionAngle;
             if(targetAngle - currentAngle > Math.PI){
-              if(targetAngle - currentAngle < Math.PI*1.2){
+              if(targetAngle - currentAngle < Math.PI*1.2 && (xdiff*xdiff + ydiff*ydiff)<100){
                 turnAngle /= 8;
               }
               newAngle = currentAngle - turnAngle;
             }else{
-              if(targetAngle - currentAngle > Math.PI*0.8){
+              if(targetAngle - currentAngle > Math.PI*0.8 && (xdiff*xdiff + ydiff*ydiff)< 100){
                 turnAngle /= 8;
               }
               
