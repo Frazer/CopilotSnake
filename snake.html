@@ -297,11 +297,11 @@
           if( dy > 0.4){
             keys[UP] = false;
             unableEffect();
-          } else if (!pu || (x+squareSize<pu || x> pu+squareSize)) {
+          } else if (!pd || (x+squareSize<pd || x> pd+squareSize)) {
             dx = 0;
             dy = -1;
-            pd = x;
-            pu = undefined;
+            pu = x;
+            pd = undefined;
             keys[UP] = false;
           }
         } else if (keys[RIGHT]){
@@ -319,11 +319,11 @@
           if(dy < -0.4){
             keys[DOWN] = false;
             unableEffect();
-          } else if (!pd || (x+squareSize < pd || x> pd+squareSize)) {
+          } else if (!pu || (x+squareSize < pu || x> pu+squareSize)) {
             dx = 0;
             dy = 1;
-            pu = x;
-            pd = undefined;
+            pd = x;
+            pu = undefined;
             keys[DOWN] = false;
           }
         }        
