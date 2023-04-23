@@ -94,25 +94,23 @@
     getMxMy = function(){
        // find if the mouse is on the canvas, and make offset releative to canvas
        let rect = canvas.getBoundingClientRect();
-      if(event.target !== canvas){
-        mx = event.offsetX - rect.left;
-      }else {
+      if(event.target == canvas){
         mx = event.offsetX;
+        my = event.offsetY;
+      }else {
+        mx = event.pageX - rect.left;
+        my = event.pageY - rect.top;
       }
       
-      if(event.target !== canvas){
-        my = event.offsetY - rect.top;
-      } else {
-        my = event.offsetY;
-      }
-
       mouseMovedSoTurn = true;
       mouseMove = true;
     }
 
     // add a mouseMove listener to keep track of mouse position
     document.addEventListener('mousemove', function(event) {
-      getMxMy();
+      if(controlWithMouse){     
+        getMxMy();
+      }
     } );
 
     // add a mouseDown listener to start the game or activate the mouse control
