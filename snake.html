@@ -378,6 +378,23 @@
             dy = Math.sin(newAngle);
           }
         }
+        // ensure that if keyboard controltakes over,
+        // the user can't turn back on the spot
+        
+        if(dx>0){
+          pr = y;
+          pl = undefined;
+        }else{
+          pl = y;
+          pr = undefined;
+        }
+        if(dy>0){
+          pd = x;
+          pu = undefined;
+        }else{
+          pu = x;
+          pd = undefined;
+        }
       }
 
       x += dx * snakeSpeed;
