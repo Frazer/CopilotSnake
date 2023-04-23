@@ -66,7 +66,7 @@
     snakeColor,foodColor,snakeSize,foodX,
     foodY, growthPerFood, snakeSpeed, snakeSpeedup, squareSize, 
     keys=[], drawing, score, highScore=0, playing, controlWithMouse, 
-    mouseMovedSoTurn, mouseMove, xdiff, ydiff,
+    mouseMovedSoTurn, mouseMove, xdiff, ydiff, showingMoup,
     enableWrap, precisionAngle, tagertAngle, scoreScreenOn;
     let happySounds = [new Audio('hooray.mp3'), new Audio('myammyam.mp3'), new Audio('woohoo.mp3'),new Audio('yumyum.mp3')];
     let deathSounds = [new Audio('ohno.mp3')];
@@ -192,6 +192,19 @@
 
       ctx.fillStyle = foodColor;
       ctx.fillRect(foodX, foodY, squareSize, squareSize);
+
+      if(showingMoup){
+        if(showingMoup > 180){
+          showingMoup = 0;
+        } else {
+          // transition across a bell curve
+          var sin = Math.sin(showingMoup/180*Math.PI);
+          ctx.fillStyle = 'hsl('+ (snakeColor + 30*sin) +',100%,50%)';
+
+          ctx.fillRect(x -sin*3, y -sin*3, squareSize + sin*6, squareSize + sin*6);
+          showingMoup+=8;
+        }
+      }
     }
     
     update = function() {
@@ -261,7 +274,9 @@
 
     unableEffect = function() {
       moupSound();
-
+      if(!showingMoup){
+        showingMoup = 1;
+      }
     }
 
     moveSnake = function() {
@@ -447,7 +462,7 @@
         Math.floor(Math.random() * (canvas.height - squareSize))
       ];
     } 
-     
+
   </script>
 </body>
 </html>
