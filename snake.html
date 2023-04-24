@@ -337,18 +337,17 @@
             ydiff = my - y;
             // find angle between current pos and mouse position
             targetAngle = Math.atan2(ydiff, xdiff);
+            // keep angle between -PI and PI
+            if (Math.abs(targetAngle) > Math.PI) {targetAngle -= Math.sign(targetAngle) * 2 * Math.PI;}
+    
             mouseMove = false;
           }
-
-          // ensure new angle isn't more than 90 degrees from current angle
-          // find angle of current direction
           let currentAngle = Math.atan2(dy, dx);
-            
-          let angleDiff = Math.abs(targetAngle - currentAngle);
-          if(angleDiff> Math.PI){
-            angleDiff = Math.PI*2 - angleDiff;
-          }
-          if(angleDiff < precisionAngle){
+
+          let angleDiff = targetAngle - currentAngle;
+          if (Math.abs(angleDiff) > Math.PI) {angleDiff -= Math.sign(angleDiff) * 2 * Math.PI;}
+          
+          if(Math.abs(angleDiff) < precisionAngle){
             // // set dx and dy to point to the mouse
             let distanceToMouse = Math.sqrt(xdiff*xdiff + ydiff*ydiff);
             dx = xdiff/distanceToMouse;
@@ -356,33 +355,32 @@
             mouseMovedSoTurn = false;
           }else{
                     
-            if(targetAngle < currentAngle){
-              targetAngle += 2* Math.PI;
-            }
-            // rotate currentAngle towards targetAngle
             let newAngle = 0;
             let turnAngle = precisionAngle;
-            if(targetAngle - currentAngle > Math.PI){
+            if(angleDiff < 0){
               if(targetAngle - currentAngle < Math.PI*1.2 && (xdiff*xdiff + ydiff*ydiff)<100){
                 turnAngle /= 8;
               }
               newAngle = currentAngle - turnAngle;
             }else{
-              if(targetAngle - currentAngle > Math.PI*0.8 && (xdiff*xdiff + ydiff*ydiff)< 100){
+              if(angleDiff > Math.PI*0.8 && (xdiff*xdiff + ydiff*ydiff)< 100){
                 turnAngle /= 8;
               }
+              }
+              
+              }              
               
               newAngle = currentAngle + turnAngle;
-              
+
             }
 
             dx = Math.cos(newAngle);
             dy = Math.sin(newAngle);
           }
         }
+
         // ensure that if keyboard controltakes over,
         // the user can't turn back on the spot
-        
         if(dx>0){
           pr = y;
           pl = undefined;
