@@ -474,8 +474,8 @@
 
     randomPosition = function() {
       return [
-        Math.floor(Math.random() * (canvas.width - squareSize)),
-        Math.floor(Math.random() * (canvas.height - squareSize))
+        Math.floor(Math.random() * (canvas.width - squareSize*3)+squareSize),
+        Math.floor(Math.random() * (canvas.height - squareSize*3)+squareSize)
       ];
     } 
 
