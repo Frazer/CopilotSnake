@@ -99,11 +99,11 @@
 
     getMxMy = function(){
        // find if the mouse is on the canvas, and make offset releative to canvas
-       let rect = canvas.getBoundingClientRect();
       if(event.target == canvas){
         mx = event.offsetX;
         my = event.offsetY;
       }else {
+        let rect = canvas.getBoundingClientRect();
         mx = event.pageX - rect.left;
         my = event.pageY - rect.top;
       }
