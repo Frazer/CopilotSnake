@@ -356,19 +356,11 @@
           }else{
                     
             let newAngle = 0;
-            let turnAngle = precisionAngle;
-            if(angleDiff < 0){
-              if(targetAngle - currentAngle < Math.PI*1.2 && (xdiff*xdiff + ydiff*ydiff)<100){
-                turnAngle /= 8;
-              }
-              newAngle = currentAngle - turnAngle;
-            }else{
-              if(angleDiff > Math.PI*0.8 && (xdiff*xdiff + ydiff*ydiff)< 100){
-                turnAngle /= 8;
-              }              
-              newAngle = currentAngle + turnAngle;
-
-            }
+            let turnAngle = precisionAngle * Math.sign(angleDiff);
+            if(Math.abs(angleDiff) > Math.PI*0.8 && (xdiff*xdiff + ydiff*ydiff)< 300 *snakeSpeed*snakeSpeed){
+                turnAngle =0;
+            }              
+            newAngle = currentAngle + turnAngle;
 
             dx = Math.cos(newAngle);
             dy = Math.sin(newAngle);
@@ -454,7 +446,7 @@
           highScore = score;
         }
         snakeSpeed+=snakeSpeedup;
-        // precisionAngle = Math.PI/squareSize/3*snakeSpeed;
+        precisionAngle = Math.PI/squareSize/3*snakeSpeed;
         let [gx,gy] = updateCanvasSize();
         snake.forEach(p=>{p.x+=gx; p.y+=gy;});
         foodX+=gx;
