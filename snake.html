@@ -91,8 +91,8 @@
     let scores = ()=>{
       return `<br>Score: `+score+`<br>Highscore: `+highScore;
     } 
-    var updates = document.querySelector('.updates');
-    var sliders = document.querySelector('.sliders');
+    let updates = document.querySelector('.updates');
+    let sliders = document.querySelector('.sliders');
     sliders.addEventListener('mousedown', function(event){
         event.stopPropagation();
       });
@@ -103,7 +103,7 @@
     const DOWN = 40;
     const SPACE = 32;
 
-    var canvas = document.getElementById('canvas');
+    let canvas = document.getElementById('canvas');
 
     let snakeSpeedSlider = document.getElementById('snakeSpeed');
     let snakeSizeSlider = document.getElementById('snakeSize');
@@ -132,7 +132,7 @@
       return [difx,dify];
     }
     updateCanvasSize();
-    var ctx = canvas.getContext('2d');
+    let ctx = canvas.getContext('2d');
     let x,y,snake,dx,dy, pl, pr, pu, pd, mx, my,
     snakeColor,foodColor,snakeSize,foodX,
     foodY, growthPerFood, snakeSpeed, snakeSpeedup, squareSize, 
@@ -261,7 +261,7 @@
       tick();
     }  
 
-    var draw = function() {
+    draw = function() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       // draw current score in top right corner
@@ -272,9 +272,9 @@
       ctx.fillText(score, canvas.width - 10 - 8*scoreLog, 14);
       
       // draw the snake
-      for (var i = snake.length-1; i >= 0; i--) {
+      for (let i = snake.length-1; i >= 0; i--) {
         // create sin wave from i to snake.length
-        var sin = Math.sin(i/30*Math.PI);
+        let sin = Math.sin(i/30*Math.PI);
         ctx.fillStyle = 'hsl('+ (snakeColor + 30*sin) +',100%,50%)';
         ctx.fillRect(snake[i].x, snake[i].y, squareSize, squareSize);
       }
@@ -290,7 +290,7 @@
           showingMoup = 0;
         } else {
           // transition across a bell curve
-          var sin = Math.sin(showingMoup/180*Math.PI);
+          let sin = Math.sin(showingMoup/180*Math.PI);
           ctx.fillStyle = 'hsl('+ (snakeColor + 30*sin) +',100%,50%)';
 
           ctx.fillRect(x -sin*3, y -sin*3, squareSize + sin*6, squareSize + sin*6);
@@ -326,7 +326,6 @@
         drawing = requestAnimationFrame(tick);
       }
     }
-
 
     moveSnake = function() {
       if(!controlWithMouse){
@@ -518,7 +517,7 @@
 
       // check if snake overlaps itself
       let snakeHeadDistance = Math.floor(3*squareSize/snakeSpeed);
-      for (var i = snakeHeadDistance; i < snake.length; i++) {
+      for (let i = snakeHeadDistance; i < snake.length; i++) {
         if (overlaps(x,y, snake[i].x , snake[i].y)) {
           // if it does, end the game
           gameOver();
