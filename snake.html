@@ -103,7 +103,6 @@
     const DOWN = 40;
     const SPACE = 32;
 
-    updates.innerHTML = startText;
     var canvas = document.getElementById('canvas');
 
     let snakeSpeedSlider = document.getElementById('snakeSpeed');
@@ -137,13 +136,20 @@
     let x,y,snake,dx,dy, pl, pr, pu, pd, mx, my,
     snakeColor,foodColor,snakeSize,foodX,
     foodY, growthPerFood, snakeSpeed, snakeSpeedup, squareSize, 
-    keys=[], drawing, score, highScore=0, playing, controlWithMouse, 
+    keys=[], drawing, score=0, highScore=0, playing, controlWithMouse, 
     mouseMovedSoTurn, mouseMove, xdiff, ydiff, showingMoup,
     enableWrap, precisionAngle, tagertAngle, scoreScreenOn, scoreMultiplier = 1;
     let happySounds = [new Audio('hooray.mp3'), new Audio('myammyam.mp3'), new Audio('woohoo.mp3'),new Audio('yumyum.mp3')];
     let deathSounds = [new Audio('ohno.mp3')];
     let moupSounds = [new Audio('moup.mp3')];
+
+    // check local storage for highscore
+    if(localStorage.getItem('highScore')){
+      highScore = localStorage.getItem('highScore');
+    }
     
+    updates.innerHTML = startText + scores();
+
     // add keylistener to keep track of latest key pressed
     document.addEventListener('keydown', function(event) {
       controlWithMouse = false;
@@ -528,6 +534,7 @@
         score += Math.ceil(snakeSize * scoreMultiplier * snakeSpeed);
         if(score > highScore){
           highScore = score;
+          localStorage.setItem('highScore', highScore);
         }
         snakeSpeed+=snakeSpeedup;
         precisionAngle = Math.PI/squareSize/3*snakeSpeed;
