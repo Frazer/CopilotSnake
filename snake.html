@@ -137,7 +137,7 @@
     snakeColor,foodColor,snakeSize,foodX,
     foodY, growthPerFood, snakeSpeed, snakeSpeedup, squareSize, 
     keys=[], drawing, score=0, highScore=0, playing, controlWithMouse, 
-    mouseMovedSoTurn, mouseMove, xdiff, ydiff, showingMoup,
+    mouseMovedSoTurn, mouseMove, xdiff, ydiff, showingMoup, lastTime,
     enableWrap, precisionAngle, tagertAngle, scoreScreenOn, scoreMultiplier = 1;
     let happySounds = [new Audio('hooray.mp3'), new Audio('myammyam.mp3'), new Audio('woohoo.mp3'),new Audio('yumyum.mp3')];
     let deathSounds = [new Audio('ohno.mp3')];
@@ -257,6 +257,7 @@
 
       playing = true;
 
+      lastTime = performance.now();
       tick();
     }  
 
@@ -372,132 +373,143 @@
     }
 
     moveSnake = function() {
-      if(!controlWithMouse){
-        // change direction based on keys pressed
-        if (keys[LEFT]){
-          if(dx > 0.4){
-            keys[LEFT] = false;
-            unableEffect();
-          } else if (!pr || (y+squareSize<pr || y> pr+squareSize)) {
-            dx = -1;
-            dy = 0;
-            pl = y;
-            pr = undefined;
-            keys[LEFT] = false;
+      // find time since last draw
+      let time = performance.now();
+      let timeDiff = time - lastTime;
+      lastTime = time;
+      
+      // find how many times to move the snake
+      let dt = (timeDiff+10)/17;
+      
+      while(dt >1){
+        if(!controlWithMouse){
+          // change direction based on keys pressed
+          if (keys[LEFT]){
+            if(dx > 0.4){
+              keys[LEFT] = false;
+              unableEffect();
+            } else if (!pr || (y+squareSize<pr || y> pr+squareSize)) {
+              dx = -1;
+              dy = 0;
+              pl = y;
+              pr = undefined;
+              keys[LEFT] = false;
+            }
+          } else if (keys[UP]){
+            if( dy > 0.4){
+              keys[UP] = false;
+              unableEffect();
+            } else if (!pd || (x+squareSize<pd || x> pd+squareSize)) {
+              dx = 0;
+              dy = -1;
+              pu = x;
+              pd = undefined;
+              keys[UP] = false;
+            }
+          } else if (keys[RIGHT]){
+            if(dx < -0.3){
+              keys[RIGHT] = false;
+              unableEffect();
+            } else if (!pl || (y+squareSize<pl || y>pl+squareSize)) {
+              dx = 1;
+              dy = 0;
+              pr = y;
+              pl = undefined;
+              keys[RIGHT] = false;
+            }
+          } else if (keys[DOWN]){
+            if(dy < -0.4){
+              keys[DOWN] = false;
+              unableEffect();
+            } else if (!pu || (x+squareSize < pu || x> pu+squareSize)) {
+              dx = 0;
+              dy = 1;
+              pd = x;
+              pu = undefined;
+              keys[DOWN] = false;
+            }
+          }        
+        } else {
+          if(mouseMovedSoTurn){
+            if(mouseMove){
+              // change direction based on mouse position
+              xdiff = mx - x;
+              ydiff = my - y;
+              // find angle between current pos and mouse position
+              targetAngle = Math.atan2(ydiff, xdiff);
+              // keep angle between -PI and PI
+              if (Math.abs(targetAngle) > Math.PI) {targetAngle -= Math.sign(targetAngle) * 2 * Math.PI;}
+      
+              mouseMove = false;
+            }
+            let currentAngle = Math.atan2(dy, dx);
+
+            let angleDiff = targetAngle - currentAngle;
+            if (Math.abs(angleDiff) > Math.PI) {angleDiff -= Math.sign(angleDiff) * 2 * Math.PI;}
+            
+            if(Math.abs(angleDiff) < precisionAngle){
+              // // set dx and dy to point to the mouse
+              let distanceToMouse = Math.sqrt(xdiff*xdiff + ydiff*ydiff);
+              dx = xdiff/distanceToMouse;
+              dy = ydiff/distanceToMouse;
+              mouseMovedSoTurn = false;
+            }else{
+                      
+              let newAngle = 0;
+              let turnAngle = precisionAngle * Math.sign(angleDiff);
+              if(Math.abs(angleDiff) > Math.PI*0.8 && (xdiff*xdiff + ydiff*ydiff)< 300 *snakeSpeed*snakeSpeed){
+                  turnAngle =0;
+              }              
+              newAngle = currentAngle + turnAngle;
+
+              dx = Math.cos(newAngle);
+              dy = Math.sin(newAngle);
+            }
           }
-        } else if (keys[UP]){
-          if( dy > 0.4){
-            keys[UP] = false;
-            unableEffect();
-          } else if (!pd || (x+squareSize<pd || x> pd+squareSize)) {
-            dx = 0;
-            dy = -1;
-            pu = x;
-            pd = undefined;
-            keys[UP] = false;
-          }
-        } else if (keys[RIGHT]){
-          if(dx < -0.3){
-            keys[RIGHT] = false;
-            unableEffect();
-          } else if (!pl || (y+squareSize<pl || y>pl+squareSize)) {
-            dx = 1;
-            dy = 0;
+
+          // ensure that if keyboard controltakes over,
+          // the user can't turn back on the spot
+          if(dx>0){
             pr = y;
             pl = undefined;
-            keys[RIGHT] = false;
+          }else{
+            pl = y;
+            pr = undefined;
           }
-        } else if (keys[DOWN]){
-          if(dy < -0.4){
-            keys[DOWN] = false;
-            unableEffect();
-          } else if (!pu || (x+squareSize < pu || x> pu+squareSize)) {
-            dx = 0;
-            dy = 1;
+          if(dy>0){
             pd = x;
             pu = undefined;
-            keys[DOWN] = false;
-          }
-        }        
-      } else {
-        if(mouseMovedSoTurn){
-          if(mouseMove){
-            // change direction based on mouse position
-            xdiff = mx - x;
-            ydiff = my - y;
-            // find angle between current pos and mouse position
-            targetAngle = Math.atan2(ydiff, xdiff);
-            // keep angle between -PI and PI
-            if (Math.abs(targetAngle) > Math.PI) {targetAngle -= Math.sign(targetAngle) * 2 * Math.PI;}
-    
-            mouseMove = false;
-          }
-          let currentAngle = Math.atan2(dy, dx);
-
-          let angleDiff = targetAngle - currentAngle;
-          if (Math.abs(angleDiff) > Math.PI) {angleDiff -= Math.sign(angleDiff) * 2 * Math.PI;}
-          
-          if(Math.abs(angleDiff) < precisionAngle){
-            // // set dx and dy to point to the mouse
-            let distanceToMouse = Math.sqrt(xdiff*xdiff + ydiff*ydiff);
-            dx = xdiff/distanceToMouse;
-            dy = ydiff/distanceToMouse;
-            mouseMovedSoTurn = false;
           }else{
-                    
-            let newAngle = 0;
-            let turnAngle = precisionAngle * Math.sign(angleDiff);
-            if(Math.abs(angleDiff) > Math.PI*0.8 && (xdiff*xdiff + ydiff*ydiff)< 300 *snakeSpeed*snakeSpeed){
-                turnAngle =0;
-            }              
-            newAngle = currentAngle + turnAngle;
-
-            dx = Math.cos(newAngle);
-            dy = Math.sin(newAngle);
+            pu = x;
+            pd = undefined;
           }
         }
 
-        // ensure that if keyboard controltakes over,
-        // the user can't turn back on the spot
-        if(dx>0){
-          pr = y;
-          pl = undefined;
-        }else{
-          pl = y;
-          pr = undefined;
+        x += dx * snakeSpeed;
+        y += dy * snakeSpeed;
+        if(enableWrap){
+          // if snake hits edge, wrap around
+          if (x > canvas.width) {
+            x = 0;
+          }
+          if (x < 0) {
+            x = canvas.width;
+          }
+          if (y > canvas.height) {
+            y = 0;
+          }
+          if (y < 0) {
+            y = canvas.height;
+          }
         }
-        if(dy>0){
-          pd = x;
-          pu = undefined;
-        }else{
-          pu = x;
-          pd = undefined;
+  
+        // move the snake by adding the current position to the front of the array
+        snake.unshift({x: x, y: y});
+        // and removing the last item from the array if the snake size is greater than snakeLength
+        if (snake.length > snakeSize) {
+          snake.pop();
         }
-      }
-
-      x += dx * snakeSpeed;
-      y += dy * snakeSpeed;
-      if(enableWrap){
-        // if snake hits edge, wrap around
-        if (x > canvas.width) {
-          x = 0;
-        }
-        if (x < 0) {
-          x = canvas.width;
-        }
-        if (y > canvas.height) {
-          y = 0;
-        }
-        if (y < 0) {
-          y = canvas.height;
-        }
-      }
-
-      // move the snake by adding the current position to the front of the array
-      snake.unshift({x: x, y: y});
-      // and removing the last item from the array if the snake size is greater than snakeLength
-      if (snake.length > snakeSize) {
-        snake.pop();
+        dt--;
       }
     }
 
